@@ -52,7 +52,7 @@ namespace TestApi
                 Authenticator = WriteAuthenticator.getInstance(),
             };
             var client = new RestClient(options);
-            var request = new RestRequest("http://localhost:49000/zip-codes/expand");;
+            var request = new RestRequest("http://localhost:49000/zip-codes/expand");
             var zipcodes = new ZipCode(new List<string>() { "12333", "12344" });
             request.AddJsonBody(zipcodes.Body);
             var response = client.Post(request);
@@ -77,7 +77,7 @@ namespace TestApi
                 Authenticator = WriteAuthenticator.getInstance(),
             };
             var client = new RestClient(options);
-            var request = new RestRequest("http://localhost:49000/zip-codes/expand"); ;
+            var request = new RestRequest("http://localhost:49000/zip-codes/expand"); 
             var zipcodes = new ZipCode(new List<string>() { "12355", "12355" });
             request.AddJsonBody(zipcodes.Body);
             var response = client.Post(request);
@@ -102,7 +102,7 @@ namespace TestApi
                 Authenticator = WriteAuthenticator.getInstance(),
             };
             var client = new RestClient(options);
-            var request = new RestRequest("http://localhost:49000/zip-codes/expand"); ;
+            var request = new RestRequest("http://localhost:49000/zip-codes/expand"); 
             var zipcodes = new ZipCode(new List<string>() { "12366", "12345" });
             request.AddJsonBody(zipcodes.Body);
             var response = client.Post(request);
