@@ -21,8 +21,6 @@ namespace TestApi
                 "12345",
                 "23456",
                 "ABCDE",
-                "12333",
-                "12344"
             };
 
             var options = new RestClientOptions()
@@ -71,7 +69,7 @@ namespace TestApi
                 "12345",
                 "23456",
                 "ABCDE",
-                "12333"
+                "12355"
             };
 
             var options = new RestClientOptions()
@@ -80,7 +78,7 @@ namespace TestApi
             };
             var client = new RestClient(options);
             var request = new RestRequest("http://localhost:49000/zip-codes/expand"); ;
-            var zipcodes = new ZipCode(new List<string>() { "12333", "12333" });
+            var zipcodes = new ZipCode(new List<string>() { "12355", "12355" });
             request.AddJsonBody(zipcodes.Body);
             var response = client.Post(request);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created), "Status Code is not 201");
@@ -96,7 +94,7 @@ namespace TestApi
                 "12345",
                 "23456",
                 "ABCDE",
-                "12333"
+                "12366"
             };
 
             var options = new RestClientOptions()
@@ -105,7 +103,7 @@ namespace TestApi
             };
             var client = new RestClient(options);
             var request = new RestRequest("http://localhost:49000/zip-codes/expand"); ;
-            var zipcodes = new ZipCode(new List<string>() { "12333", "12345" });
+            var zipcodes = new ZipCode(new List<string>() { "12366", "12345" });
             request.AddJsonBody(zipcodes.Body);
             var response = client.Post(request);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created), "Status Code is not 201");
