@@ -208,5 +208,98 @@ namespace TestApi
             var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
             Assert.That(getUserResponse.Any(u => u.Name.Equals(user.Name)), Is.False, "User is created");
         }
+
+        [Test]
+        public void GetUsers_Test()
+        {
+            var users = new List<User>()
+            {
+                new User(20, "TestName20", Enums.Sex.MALE, "12345"),
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var createUserRequest = new RestRequest("http://localhost:49000/users");
+            createUserRequest.AddJsonBody(users[0]);
+            var createUserResponse = writeClient.Post(createUserRequest);
+            createUserRequest = new RestRequest("http://localhost:49000/users");
+            createUserRequest.AddJsonBody(users[1]);
+            createUserResponse = writeClient.Post(createUserRequest);
+            createUserRequest = new RestRequest("http://localhost:49000/users");
+            createUserRequest.AddJsonBody(users[2]);
+            createUserResponse = writeClient.Post(createUserRequest);
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.All(x => users.Any(y => y.Name == x.Name)), "Users are not correspond");
+        }
+
+        [Test]
+        public void GetUsersByOlderAge_Test()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = ReadAuthenticator.getInstance(),
+            };
+            var client = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            getUserRequest.AddParameter("olderThan", 29);
+            var getUserResponse = client.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(expectedUsers.All(x => getUserResponse.Any(y => y.Name == x.Name)), "Users filtered by age are not correspond");
+        }
+
+        [Test]
+        public void GetUsersByYoungerAge_Test()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(20, "TestName20", Enums.Sex.MALE, "12345"),
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = ReadAuthenticator.getInstance(),
+            };
+            var client = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            getUserRequest.AddParameter("youngerThan", 39);
+            var getUserResponse = client.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(expectedUsers.All(x => getUserResponse.Any(y => y.Name == x.Name)), "Users filtered by age are not correspond");
+        }
+
+        [Test]
+        public void GetUsersBySex_Test()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = ReadAuthenticator.getInstance(),
+            };
+            var client = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            getUserRequest.AddParameter("sex", "FEMALE");
+            var getUserResponse = client.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(expectedUsers.All(x => getUserResponse.Any(y => y.Name == x.Name)), "Users filtered by age are not correspond");
+        }
+
     }
 }
