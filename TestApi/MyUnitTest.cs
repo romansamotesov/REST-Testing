@@ -301,5 +301,104 @@ namespace TestApi
             Assert.That(expectedUsers.All(x => getUserResponse.Any(y => y.Name == x.Name)), "Users filtered by age are not correspond");
         }
 
+
+        [Test]
+        public void UpdateUser_Test()
+        {
+            var userToChange = new User(30, "TestName30", Enums.Sex.FEMALE, "23456");
+            var userNewValues = new User(30, "TestName31", Enums.Sex.FEMALE, "23456");
+            var updateUserBody = new UpdateUserRequest()
+            {
+                UserToChange = userToChange,
+                UserNewValues = userNewValues
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var putUserRequest = new RestRequest("http://localhost:49000/users");
+            putUserRequest.AddJsonBody(updateUserBody);
+            var putUserResponse = writeClient.PutAsync(putUserRequest).Result;
+            Assert.That(putUserResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK), "Status Code is not 200");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals(userNewValues.Name)), "User is not updated");
+        }
+
+        [Test]
+        public void UpdateUserWithIndalidZipCode_UserIsNotUpdated_Test()
+        {
+            var userToChange = new User(30, "TestName30", Enums.Sex.FEMALE, "23456");
+            var userNewValues = new User(30, "TestName31", Enums.Sex.FEMALE, "23466");
+            var updateUserBody = new UpdateUserRequest()
+            {
+                UserToChange = userToChange,
+                UserNewValues = userNewValues
+            };
+            var expectedErrorMessage = "One or more errors occurred. (Request failed with status code FailedDependency)";
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var putUserRequest = new RestRequest("http://localhost:49000/users");
+            putUserRequest.AddJsonBody(updateUserBody);
+            try
+            {
+                var putUserResponse = writeClient.PutAsync(putUserRequest).Result;
+            }
+            catch (Exception ex)
+            {
+                Assert.That(ex.Message, Is.EqualTo(expectedErrorMessage), "Status Code is not 424");
+            }
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals(userNewValues.Name)), Is.False, "User is updated");
+        }
+
+        [Test]
+        public void UpdateUserWithNotFilledReqiuredFields_UserIsNotUpdated_Test()
+        {
+            var userToChange = new User(30, "TestName30", Enums.Sex.FEMALE, "23456");
+            var userNewValues = new User("TestName33", Enums.Sex.FEMALE);
+            userNewValues.Name = null;
+            var updateUserBody = new UpdateUserRequest()
+            {
+                UserToChange = userToChange,
+                UserNewValues = userNewValues
+            };
+            var expectedErrorMessage = "One or more errors occurred. (Request failed with status code Conflict)";
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var putUserRequest = new RestRequest("http://localhost:49000/users");
+            putUserRequest.AddJsonBody(updateUserBody);
+            try
+            {
+                var putUserResponse = writeClient.PutAsync(putUserRequest).Result;
+            }
+            catch (Exception ex)
+            {
+                Assert.That(ex.Message, Is.EqualTo(expectedErrorMessage), "Status Code is not 409");
+            }
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals(userNewValues.Name)), Is.False, "User is updated");
+        }
     }
 }

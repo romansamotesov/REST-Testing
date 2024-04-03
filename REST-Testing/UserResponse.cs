@@ -2,7 +2,7 @@
 
 namespace REST_Testing
 {
-    public record class UserResponse
+    public record UserResponse
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }
