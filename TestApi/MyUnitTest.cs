@@ -2,6 +2,9 @@ using RestSharp;
 using REST_Testing;
 using System.Net;
 using System.Threading.Tasks.Dataflow;
+using Newtonsoft.Json;
+using NUnit.Framework.Internal;
+using System.Text;
 
 
 namespace TestApi
@@ -399,6 +402,168 @@ namespace TestApi
             var getUserRequest = new RestRequest("http://localhost:49000/users");
             var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
             Assert.That(getUserResponse.Any(u => u.Name.Equals(userNewValues.Name)), Is.False, "User is updated");
+        }
+
+        [Test]
+        public void DeleteUser_Test()
+        {
+            var userToDelete = new User(20, "TestName20", Enums.Sex.MALE, "12345");
+            var expectedZipCode = "12345";
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var deleteUserRequest = new RestRequest("http://localhost:49000/users");
+            deleteUserRequest.AddJsonBody(userToDelete);
+            var deleteUserResponse = writeClient.DeleteAsync(deleteUserRequest).Result;
+            Assert.That(deleteUserResponse.StatusCode, Is.EqualTo(HttpStatusCode.NoContent), "Status code is not 204");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals(userToDelete.Name)), Is.False, "User is not deleted");
+            
+            var getZipCodesRequest = new RestRequest("http://localhost:49000/zip-codes");
+            var getZipCodesresponse = readClient.GetAsync(getZipCodesRequest).Result;
+            var receivedZipcodes = ZipCode.ZipCodesToList(getZipCodesresponse.Content);
+            Assert.That(receivedZipcodes.Any(z => z.Equals(expectedZipCode)), Is.True, "Zipcode not exist");
+        }
+
+        [Test]
+        public void DeleteUserWithRequiredFields_UserIsDeleted_Test()
+        {
+            var userToDelete = new User("TestName40", Enums.Sex.FEMALE);
+            var expectedZipCode = "12345";
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var deleteUserRequest = new RestRequest("http://localhost:49000/users");
+            deleteUserRequest.AddJsonBody(userToDelete);
+            var deleteUserResponse = writeClient.DeleteAsync(deleteUserRequest).Result;
+            Assert.That(deleteUserResponse.StatusCode, Is.EqualTo(HttpStatusCode.NoContent), "Status code is not 204");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals(userToDelete.Name)), Is.False, "User is not deleted");
+
+            var getZipCodesRequest = new RestRequest("http://localhost:49000/zip-codes");
+            var getZipCodesresponse = readClient.GetAsync(getZipCodesRequest).Result;
+            var receivedZipcodes = ZipCode.ZipCodesToList(getZipCodesresponse.Content);
+            Assert.That(receivedZipcodes.Any(z => z.Equals(expectedZipCode)), Is.True, "Zipcode not exist");
+
+        }
+
+        [Test]
+        public void DeleteUserWithEmptyRequiredField_UserIsNotDeleted_Test()
+        {
+            var userToDelete = new User(20, "TestName40", Enums.Sex.FEMALE, "ABCDE");
+            userToDelete.Name = null;
+            var expectedErrorMessage = "One or more errors occurred. (Request failed with status code Conflict)";
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var deleteUserRequest = new RestRequest("http://localhost:49000/users");
+            deleteUserRequest.AddJsonBody(userToDelete);
+            var exception = Assert.Throws<AggregateException>(() => writeClient.DeleteAsync(deleteUserRequest).Result.ToString());
+            Assert.That(exception.Message, Is.EqualTo(expectedErrorMessage), "Status Code is not 409");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(u => u.Name.Equals("TestName40")), Is.True, "User is deleted deleted");
+
+        }
+
+        [Test]
+        public void UploadUsers_Test()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(20, "TestName20", Enums.Sex.MALE, "12345"),
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var uploadUsersRequest = new RestRequest("http://localhost:49000/users/upload");
+            uploadUsersRequest.AddFile("file", Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"\\MyJson.json");
+            var uploadUsersResponse = writeClient.Post(uploadUsersRequest);
+            Assert.That(uploadUsersResponse.StatusCode, Is.EqualTo(HttpStatusCode.Created), "Status Code is not 201");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.All(x => expectedUsers.Any(y => y.Name == x.Name)), "Users are not correspond");
+        }
+
+        [Test]
+        public void UploadUsersWithIncorrectZipCodes_UsersAreNotUploadedTest()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(20, "TestName20", Enums.Sex.MALE, "12344"),
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var uploadUsersRequest = new RestRequest("http://localhost:49000/users/upload");
+            uploadUsersRequest.AddFile("file", Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"\\MyIncorrectJson.json");
+            var exception = Assert.Throws<HttpRequestException>(() => writeClient.Post(uploadUsersRequest));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.FailedDependency), "Status Code is not 424");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(x => expectedUsers.Any(y => y.Name == x.Name)), Is.False, "Users are uploaded");
+        }
+
+        [Test]
+        public void UploadUsersWithMissedRequiredFields_UsersAreNotUploadedTest()
+        {
+            var expectedUsers = new List<User>()
+            {
+                new User(30, "TestName30", Enums.Sex.FEMALE, "23456"),
+                new User(40, "TestName40", Enums.Sex.FEMALE, "ABCDE"),
+            };
+
+            var options = new RestClientOptions()
+            {
+                Authenticator = WriteAuthenticator.getInstance(),
+            };
+            var writeClient = new RestClient(options);
+            var uploadUsersRequest = new RestRequest("http://localhost:49000/users/upload");
+            uploadUsersRequest.AddFile("file", Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + @"\\MyMissedRequiredFieldsJson.json");
+            var exception = Assert.Throws<HttpRequestException>(() => writeClient.Post(uploadUsersRequest));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Conflict), "Status Code is not 409");
+
+            options.Authenticator = ReadAuthenticator.getInstance();
+            var readClient = new RestClient(options);
+            var getUserRequest = new RestRequest("http://localhost:49000/users");
+            var getUserResponse = readClient.GetAsync<List<UserResponse>>(getUserRequest).Result;
+            Assert.That(getUserResponse.Any(x => expectedUsers.Any(y => y.Name == x.Name)), Is.True, "Users are uploaded");
         }
     }
 }
