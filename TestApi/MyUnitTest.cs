@@ -1076,7 +1076,7 @@ namespace TestApi
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Exception is occurred");
+                Logger.Error(ex, "Exception is  occurred");
                 throw new Exception();
             }
         }
