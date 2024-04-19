@@ -21,7 +21,7 @@ namespace TestApi
             };
             var client = new RestClient(options);
             var request = new RestRequest("http://localhost:49000/zip-codes");
-            var result = client.GetAsync(request).Result;
+            var result = client.GetAsync(request).Result; 
         }
     }
 }
