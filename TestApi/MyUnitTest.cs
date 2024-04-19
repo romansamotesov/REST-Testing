@@ -32,7 +32,7 @@ namespace TestApi
         [AllureIssue("Issue Status Code is not 200")]
         public void GetZipCodes_Test()
         {
-            var expectedZipCodes = new List<string>()
+            var expectedZipCodes = new List<string>()//test githubactions
             {
                 "12345",
                 "23456",
