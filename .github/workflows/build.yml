@@ -1,7 +1,7 @@
 on: push
 jobs: 
   first-job:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - run: docker pull coherentsolutions/rest-training:2.0 
       - run: docker run -d -p localhost:49000 coherentsolutions/rest-training:2.0
