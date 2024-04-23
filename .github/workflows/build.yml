@@ -3,5 +3,5 @@ jobs:
   first-job:
     runs-on: windows-latest
     steps:
-      - run: node --version
-      - run: npm --version
+      - run: docker pull coherentsolutions/rest-training:2.0 
+      - run: docker run -d -p localhost:49000 coherentsolutions/rest-training:2.0
