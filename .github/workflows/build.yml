@@ -1,12 +1,11 @@
 on: push
 jobs: 
   first-job:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: npm ci
-      - run: npm run build
+      - uses: microsoft/setup-msbuild@v2
       - run: dotnet test
