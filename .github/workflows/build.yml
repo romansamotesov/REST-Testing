@@ -4,4 +4,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: docker pull coherentsolutions/rest-training:2.0 
-      - run: docker run -d -p 49000:49000 coherentsolutions/rest-training:2.0
+      - run: docker run -d -p 49000:8082 coherentsolutions/rest-training:2.0
