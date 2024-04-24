@@ -9,5 +9,5 @@ jobs:
           dotnet-version: 8.0.x
       - uses: microsoft/setup-msbuild@v2
       - run: dotnet restore 
-      - run: MSBuild.exe
+      - run: dotnet build --no-restore
       - run: dotnet test
