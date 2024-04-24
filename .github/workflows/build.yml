@@ -1,6 +1,6 @@
 on: push
 jobs: 
-  first-job:
+ job:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -9,5 +9,5 @@ jobs:
           dotnet-version: 8.0.x
       - uses: microsoft/setup-msbuild@v2
       - run: dotnet restore 
-      - run: dotnet build --no-restore
+      - run: dotnet build 
       - run: dotnet test
