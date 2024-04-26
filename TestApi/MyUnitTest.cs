@@ -26,7 +26,7 @@ namespace TestApi
         [OneTimeSetUp]
         public void Setup()
         {
-            Logger.Info("Test execution started");
+            Logger.Info("Test execution started");//test
         }
 
         [Test]
