@@ -1,0 +1,15 @@
+2024-04-26 07:51:19.5617|INFO|TestApi.MyUnitTests|http://localhost:49000/zip-codes/expand
+2024-04-26 07:51:19.5684|INFO|TestApi.MyUnitTests|["12366","12355"]
+2024-04-26 07:51:19.5684|ERROR|TestApi.MyUnitTests|Exception is occurred|NUnit.Framework.AssertionException:   lists of zipCodes are not equal
+Assert.That(receivedZipcodes, Is.EqualTo(expectedZipCodes))
+  Expected is <System.Collections.Generic.List`1[System.String]> with 5 elements, actual is <System.Collections.Generic.List`1[System.String]> with 2 elements
+  Values differ at index [0]
+  String lengths are both 5. Strings differ at index 3.
+  Expected: < "12345", "ABCDE", "12333", "12344", "12355" >
+  But was:  < "12366", "12355" >
+  First non-matching item at index [0]: "12345"
+
+   at NUnit.Framework.Assert.ReportFailure(String message)
+   at NUnit.Framework.Assert.ReportFailure(ConstraintResult result, String message, String actualExpression, String constraintExpression)
+   at NUnit.Framework.Assert.That[TActual](TActual actual, IResolveConstraint expression, NUnitString message, String actualExpression, String constraintExpression)
+   at TestApi.MyUnitTests.PostDuplicateZipCodes_Test() in /home/runner/work/REST-Testing/REST-Testing/TestApi/MyUnitTest.cs:line 152
