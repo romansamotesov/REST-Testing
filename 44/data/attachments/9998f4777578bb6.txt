@@ -1,0 +1,2 @@
+2024-04-26 13:52:56.9550|INFO|TestApi.MyUnitTests|http://localhost:49000/users
+2024-04-26 13:52:56.9746|INFO|TestApi.MyUnitTests|System.Collections.Generic.List`1[REST_Testing.UserResponse]

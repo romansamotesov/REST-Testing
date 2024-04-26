@@ -1,0 +1,2 @@
+2024-04-26 13:52:57.0364|INFO|TestApi.MyUnitTests|http://localhost:49000/users
+2024-04-26 13:52:57.0402|INFO|TestApi.MyUnitTests|
