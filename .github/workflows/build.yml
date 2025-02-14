@@ -8,7 +8,7 @@ jobs:
       - run: docker run -d -p 49000:8082 coherentsolutions/rest-training:2.0   
 
       
-      - name: Checkout and load history
+      - name: Checkout and load test report history
         uses: actions/checkout@v4
         if: always()
         continue-on-error: true
