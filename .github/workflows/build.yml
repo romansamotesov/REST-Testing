@@ -3,15 +3,28 @@ jobs:
  job:
     runs-on: ubuntu-latest
     steps:
+      - name: Pull and run docker container
       - run: docker pull coherentsolutions/rest-training:2.0 
       - run: docker run -d -p 49000:8082 coherentsolutions/rest-training:2.0   
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+          
+      - name: Build project and run tests  
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
       - run: dotnet restore 
       - run: dotnet build 
       - run: dotnet test
+
 
       - name: Load test report history
         uses: actions/checkout@v3
@@ -29,6 +42,7 @@ jobs:
           gh_pages: gh-pages
           allure_history: allure-history
           allure_results: ${{ env.WORKING_DIR }}TestApi/bin/Debug/net8.0/allure-results
+
 
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
